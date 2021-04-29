@@ -5,6 +5,7 @@ var svgHeight = 500;
 // Set default x and y axis variables.
 var xAxis = "poverty";
 var yAxis = "healthcare";
+
 // Use function to update variable on x-axis label.
 function xScale(data, xAxis, chartWidth) {
     // Create x linear scales.
@@ -14,6 +15,7 @@ function xScale(data, xAxis, chartWidth) {
         .range([0, chartWidth]);
     return xLinearScale;
 }
+
 // Use function to update variable on x-axis label.
 function yScale(data, chosenYAxis, chartHeight) {
     // Create y linear scales.
@@ -23,6 +25,7 @@ function yScale(data, chosenYAxis, chartHeight) {
         .range([chartHeight, 0]);
     return yLinearScale;
 }
+
 //Create makeResponsive function
 function makeResponsive() {
     // Select div by id.
@@ -69,11 +72,11 @@ function makeResponsive() {
         var bottomAxis = d3.axisBottom(xLinearScale);
         var leftAxis = d3.axisLeft(yLinearScale);
         // Append the x axis.
-        var xAxis = chartGroup.append("g")
+        var testXAxis = chartGroup.append("g")
             .attr("transform", `translate(0, ${chartHeight})`)
             .call(bottomAxis);
         // Append the y axis.
-        var yAxis = chartGroup.append("g")
+        var testYAxis = chartGroup.append("g")
             .call(leftAxis);
         // Set data used for creating circles.
         var circleGroup = chartGroup.selectAll("circle")
@@ -82,14 +85,14 @@ function makeResponsive() {
         var circleEnter = circlesGroup.enter();
         // Create the circles.
         var circle = circleEnter.append("circle")
-            .attr("cx", d => xLinearScale(d[chosenXAxis]))
-            .attr("cy", d => yLinearScale(d[chosenYAxis]))
+            .attr("cx", d => xLinearScale(d[xAxis]))
+            .attr("cy", d => yLinearScale(d[yAxis]))
             .attr("r", 15)
             .classed("stateCircle", true);
         // Create the text for the circles.
         var circleText = circleEnter.append("text")            
-            .attr("x", d => xLinearScale(d[chosenXAxis]))
-            .attr("y", d => yLinearScale(d[chosenYAxis]))
+            .attr("x", d => xLinearScale(d[xAxis]))
+            .attr("y", d => yLinearScale(d[yAxis]))
             .attr("dy", ".35em") 
             .text(d => d.abbr)
             .classed("stateText", true);
@@ -148,7 +151,7 @@ function makeResponsive() {
                 // Update xLinearScale.
                 xLinearScale = xScale(demoData, xAxis, chartWidth);
                 // Render xAxis.
-                renderXAxis = renderXAxes(xLinearScale, renderXAxis);
+                testXAxis = renderXAxes(xLinearScale, testXAxis);
                 // Switch active/inactive labels.
                 if (xAxis === "poverty") {
                     povertyLabel
@@ -160,7 +163,8 @@ function makeResponsive() {
                     incomeLabel
                         .classed("active", false)
                         .classed("inactive", true);
-                } else if (xAxis === "age") {
+                } 
+                  else if (xAxis === "age") {
                     povertyLabel
                         .classed("active", false)
                         .classed("inactive", true);
@@ -170,7 +174,8 @@ function makeResponsive() {
                     incomeLabel
                         .classed("active", false)
                         .classed("inactive", true);
-                } else {
+                } 
+                  else {
                     povertyLabel
                         .classed("active", false)
                         .classed("inactive", true);
@@ -188,8 +193,62 @@ function makeResponsive() {
                 // Update circles text with new values.
                 circleText = renderText(circleText, xLinearScale, yLinearScale, xAxis, yAxis);
             });
-
-
-            
+        
+        // Y Labels event listener.
+        yLabelsGroup.selectAll("text")
+            .on("click", function() {
+                // Grab selected label.
+                yAxis = d3.select(this).attr("value");
+                // Update yLinearScale.
+                yLinearScale = yScale(demoData, yAxis, chartHeight);
+                // Update yAxis.
+                testYAxis = renderYAxes(yLinearScale, testYAxis);
+                // Changes classes to change bold text.
+                if (chosenYAxis === "healthcare") {
+                    healthcareLabel
+                        .classed("active", true)
+                        .classed("inactive", false);
+                    smokesLabel
+                        .classed("active", false)
+                        .classed("inactive", true);
+                    obeseLabel
+                        .classed("active", false)
+                        .classed("inactive", true);
+                } 
+                  else if (chosenYAxis === "smokes") {
+                    healthcareLabel
+                        .classed("active", false)
+                        .classed("inactive", true);
+                    smokesLabel
+                        .classed("active", true)
+                        .classed("inactive", false);
+                    obeseLabel
+                        .classed("active", false)
+                        .classed("inactive", true);
+                } 
+                  else {
+                    healthcareLabel
+                        .classed("active", false)
+                        .classed("inactive", true);
+                    smokesLabel
+                        .classed("active", false)
+                        .classed("inactive", true);
+                    obeseLabel
+                        .classed("active", true)
+                        .classed("inactive", false);
+                }
+                // Update circles with new y values.
+                circle = renderCircles(circlesGroup, xLinearScale, yLinearScale, xAxis, yAxis);
+                // Update circles text with new values.
+                circleText = renderText(circleText, xLinearScale, yLinearScale, xAxis, yAxis);
+                // Update tool tips with new info.
+                circlesGroup = updateToolTip(xAxis, yAxis, circle, circleText);
+            });
+    }).catch(function(err) {
+        console.log(err);
     });
-};
+}
+makeResponsive();
+// Event listener for window resize.
+// When the browser window is resized, makeResponsive() is called.
+d3.select(window).on("resize", makeResponsive);
