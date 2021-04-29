@@ -116,6 +116,80 @@ function makeResponsive() {
             .attr("value", "income")
             .classed("inactive", true)
             .text("Household Income (Median)");
+        // Add y labels group and labels.
+        var yLabelsGroup = chartGroup.append("g")
+            .attr("transform", "rotate(-90)");
+        var healthcareLabel = yLabelsGroup.append("text")
+            .attr("x", 0 - (chartHeight / 2))
+            .attr("y", 40 - margin.left)
+            .attr("dy", "1em")
+            .attr("value", "healthcare")
+            .classed("active", true)
+            .text("Lacks Healthcare (%)");
+        var smokesLabel = yLabelsGroup.append("text")
+            .attr("x", 0 - (chartHeight / 2))
+            .attr("y", 20 - margin.left)
+            .attr("dy", "1em")
+            .attr("value", "smokes")
+            .classed("inactive", true)
+            .text("Smokes (%)");
+        var obeseLabel = yLabelsGroup.append("text")
+            .attr("x", 0 - (chartHeight / 2))
+            .attr("y", 0 - margin.left)
+            .attr("dy", "1em")
+            .attr("value", "obesity")
+            .classed("inactive", true)
+            .text("Obese (%)");
+        // X labels event listener.
+        xLabelsGroup.selectAll("text")
+            .on("click", function() {
+                // Grab selected label.
+                xAxis = d3.select(this).attr("value");
+                // Update xLinearScale.
+                xLinearScale = xScale(demoData, xAxis, chartWidth);
+                // Render xAxis.
+                renderXAxis = renderXAxes(xLinearScale, renderXAxis);
+                // Switch active/inactive labels.
+                if (xAxis === "poverty") {
+                    povertyLabel
+                        .classed("active", true)
+                        .classed("inactive", false);
+                    ageLabel
+                        .classed("active", false)
+                        .classed("inactive", true);
+                    incomeLabel
+                        .classed("active", false)
+                        .classed("inactive", true);
+                } else if (xAxis === "age") {
+                    povertyLabel
+                        .classed("active", false)
+                        .classed("inactive", true);
+                    ageLabel
+                        .classed("active", true)
+                        .classed("inactive", false);
+                    incomeLabel
+                        .classed("active", false)
+                        .classed("inactive", true);
+                } else {
+                    povertyLabel
+                        .classed("active", false)
+                        .classed("inactive", true);
+                    ageLabel
+                        .classed("active", false)
+                        .classed("inactive", true)
+                    incomeLabel
+                        .classed("active", true)
+                        .classed("inactive", false);
+                }
+                // Update circles with new x values.
+                circle = renderCircles(circlesGroup, xLinearScale, yLinearScale, xAxis, yAxis);
+                // Update tool tips with new info.
+                circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circle, circleText);
+                // Update circles text with new values.
+                circleText = renderText(circleText, xLinearScale, yLinearScale, xAxis, yAxis);
+            });
 
+
+            
     });
 };
